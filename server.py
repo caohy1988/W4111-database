@@ -38,6 +38,7 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #     DATABASEURI = "postgresql://ewu2493:foobar@w4111db.eastus.cloudapp.azure.com/ewu2493"
 #
 DATABASEURI = "sqlite:///test.db"
+#DATABASEURI = "postgresql://hc2819:KRBJZL@w4111db.eastus.cloudapp.azure.com/hc2819"
 
 
 #
@@ -61,12 +62,12 @@ engine = create_engine(DATABASEURI)
 # 
 # The setup code should be deleted once you switch to using the Part 2 postgresql database
 #
-engine.execute("""DROP TABLE IF EXISTS test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS test (
-  id serial,
-  name text
-);""")
-engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
+#engine.execute("""DROP TABLE IF EXISTS test;""")
+#engine.execute("""CREATE TABLE IF NOT EXISTS test (
+#  id serial,
+#  name text
+#);""")
+#engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
 #
 # END SQLITE SETUP CODE
 #
@@ -186,16 +187,21 @@ def index():
 def another():
   return render_template("anotherfile.html")
 
+@app.route('/basicsearch', methods=['POST'])
+def basicsearch():
+  name = request.form['name']
+  g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
+  return redirect('/')
 
 # Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
+@app.route('/searchword', methods=['POST'])
+def searchword():
   name = request.form['name']
   g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
   return redirect('/')
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET','POST'])
 def login():
     abort(401)
     this_is_never_executed()
