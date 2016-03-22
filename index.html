@@ -3,7 +3,23 @@
     body{ 
       font-size: 15pt;
       font-family: arial;
-      background-color: rgb(173,216,230);
+      {#background-color: rgb(173,216,230);#}
+      {#background-image:url(bg.jpg) repeat;#}
+    }
+
+    h1 {
+    color: orange;
+    text-align: center;
+    }
+
+    p {
+    font-family: "Times New Roman";
+    font-size: 20px;
+    }
+
+    img {
+    opacity: 0.4;
+    filter: alpha(opacity=40); /* For IE8 and earlier */
     }
     .container {
     position: relative;
@@ -15,11 +31,14 @@
     right: 16px;
     font-size: 18px;
     }
+
   </style>
 
 
 <body> 
+  <img src = "/bg.jpg" width=100% height="200" alt="klematis"/>
   <h1>Choose your favorite and healthy food!</h1>
+
   <h4> Restaurant </h4>
   <select name = "restaurant", style="width: 300px;">
       <option value = "7 Eleven"> 7 Eleven </option>
@@ -46,26 +65,49 @@
   </select>
 
   <h4> Range of Nutrients </h4>
-  <select name = "range of nutrients", style="width: 300px;">
+  <form>
+    Upper range:
+    <input type = "text" name = "upperrange"> <br>
+    Lower range:
+    <input type = "text" name = "lowerrange">
+  </form>
+
+  {#<select name = "range of nutrients", style="width: 300px;">
       <option value = "0-50"> 0-50 </option>
       <option value = "50-100"> 50-100 </option>
       <option value = "100-200"> 100-200 </option>
-  </select>
+  </select>#}
 
-  <div class="topright">Log In</div>
-  <form id="loginForm" action="js_form_action.asp" method="get">
-  Firstname: <input type="text" name="firstname" size="20"><br />
-  Lastname: <input type="text" name="lastname" size="20"><br />
-  <br />
-  <input type="button" onclick="formSubmit()" value="Submit">
+  {#<div class="topright"><a href="/log in">Log In</div> #}
+ 
+  <form method="POST" action="/basicsearch">
+  <h5><input type="submit" value="Submit"> </h5>
   </form>
-  
 
-<p><a href="/another">Go to the other page</a></p>
+ <p><a href="/another">Go to the other page</a></p>
 
-<form method="POST" action="/searchword">
-<p>Key words search: <input type="text" name="searchword"> <input type="submit" value="search"></p>
-</form>
+ <form method="POST" action="/searchword">
+ <p>Key words search: <input type="text" name="searchword"> <input type="submit" value="search"></p>
+ </form>
+
+<script>
+    function update(){
+     var opt_restaurant=document.getElementByName('restaurant').value
+     var opt_category=document.getElementByName('category').value
+     var opt_upnutrients=document.getElementByName('upperrange').value
+     var opt_lownutrients=document.getElementByName('lowerrange').value
+
+   }
+</script>
+
+  <h1>data select from restaurant</h1>
+  <div>{{data}}</div>
+
+  <div>
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div>
 
 </body>
 
