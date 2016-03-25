@@ -183,19 +183,20 @@ def index():
 # notice that the functio name is another() rather than index()
 # the functions for each app.route needs to have different names
 #
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
+@app.route('/order_page')
+def order_page():
+  return render_template("order.html")
 
-@app.route('/basicsearch', methods=['POST'])
-def basicsearch():
-  name = request.form['name']
-  g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
-  return redirect('/')
+@app.route('/back')
+def back():
+  return render_template("index.html")
 
-# Example of adding new data to the database
-@app.route('/searchword', methods=['POST'])
-def searchword():
+@app.route('/order')
+def order():
+  return render_template("final.html")
+
+@app.route('/search', methods=['POST'])
+def search():
   name = request.form['name']
   g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
   return redirect('/')
