@@ -19,6 +19,15 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response
+ 
+import re
+import time 
+import json 
+import md5
+import pdb
+import random 
+import psycopg2
+import traceback
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -37,8 +46,8 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #
 #     DATABASEURI = "postgresql://ewu2493:foobar@w4111db.eastus.cloudapp.azure.com/ewu2493"
 #
-DATABASEURI = "sqlite:///test.db"
-#DATABASEURI = "postgresql://hc2819:KRBJZL@w4111db.eastus.cloudapp.azure.com/hc2819"
+#DATABASEURI = "sqlite:///test.db"
+DATABASEURI = "postgresql://hc2819:KRBJZL@w4111db.eastus.cloudapp.azure.com/hc2819"
 
 
 #
@@ -130,16 +139,14 @@ def index():
   # DEBUG: this is debugging code to see what request looks like
   print request.args
 
-
-  #
-  # example of a database query
-  #
-  cursor = g.conn.execute("SELECT name FROM test")
+  #cursor = g.conn.execute("select rid from restaurants;")
+  #cursor = g.conn.execute("select rm.namemenu, rt.name,m.caloryamount, m.proteinamount, m.sodiumamount, rm.price from restaurants rt, restaurantsmenu rm, menunutrients m where rm.rid = rt.rid and rm.mid = m.mid and m.rid = rm.rid; ")
+#  print len(cursor)
+  #for item in cursor:
+    #print item['rid']
+  #cursor.close()
   names = []
-  for result in cursor:
-    names.append(result['name'])  # can also be accessed using result[0]
-  cursor.close()
-
+  
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
   # pass data to a template and dynamically generate HTML based on the data
@@ -174,6 +181,42 @@ def index():
   # for example, the below file reads template/index.html
   #
   return render_template("index.html", **context)
+  #
+  # Flask uses Jinja templates, which is an extension to HTML where you can
+  # pass data to a template and dynamically generate HTML based on the data
+  # (you can think of it as simple PHP)
+  # documentation: https://realpython.com/blog/python/primer-on-jinja-templating/
+  #
+  # You can see an example template in templates/index.html
+  #
+  # context are the variables that are passed to the template.
+  # for example, "data" key in the context variable defined below will be 
+  # accessible as a variable in index.html:
+  #
+  #     # will print: [u'grace hopper', u'alan turing', u'ada lovelace']
+  #     <div>{{data}}</div>
+  #     
+  #     # creates a <div> tag for each element in data
+  #     # will print: 
+  #     #
+  #     #   <div>grace hopper</div>
+  #     #   <div>alan turing</div>
+  #     #   <div>ada lovelace</div>
+  #     #
+  #     {% for n in data %}
+  #     <div>{{n}}</div>
+  #     {% endfor %}:
+  #
+  #context = dict(foodname = foodname, restautrant = restaurantname, sodium = sodium, calorie = calorie, protein = protein, price = price )
+
+
+  #
+  # render_template looks in the templates/ folder for files.
+  # for example, the below file reads template/index.html
+  #
+@app.route('/')
+def approot():
+  return render_template("index.html")
 
 #
 # This is an example of a different path.  You can see it at
@@ -183,6 +226,18 @@ def index():
 # notice that the functio name is another() rather than index()
 # the functions for each app.route needs to have different names
 #
+#@app.route('/another')
+#def another():
+#  return render_template("anotherfile.html")
+
+#@app.route('/basicsearch', methods=['POST'])
+#def basicsearch():
+#  name = request.form['name']
+#  g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
+#  return redirect('/')
+
+# Example of adding new data to the database
+
 @app.route('/order_page')
 def order_page():
   return render_template("order.html")
@@ -195,11 +250,95 @@ def back():
 def order():
   return render_template("final.html")
 
-@app.route('/search', methods=['POST'])
+@app.route('/search', methods=['POST','GET'])
 def search():
-  name = request.form['name']
-  g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
-  return redirect('/')
+  for item in request.form:
+    print item
+    print request.form[item]
+  restaurant = request.form['restaurant']
+  category = request.form['category']
+  calorie_upper = request.form['calorie_upper']
+  calorie_lower = request.form['calorie_lower']
+  sodium_upper = request.form['sodium_upper']
+  sodium_lower = request.form['sodium_lower']
+  protein_upper = request.form['protein_upper']
+  protein_lower = request.form['protein_lower']
+  keyword = request.form['keyword']
+
+  q = 'select rm.namemenu, rt.name,m.caloryamount, m.proteinamount, m.sodiumamount, rm.price from restaurants rt, restaurantsmenu rm, menunutrients m where rm.rid = rt.rid and rm.mid = m.mid and m.rid = rm.rid and rt.name = %s and rm.namemenu = %s and rm.category = %s and  m.caloryamount < %s and m.caloryamount > %s and m.sodiumamount < %s and m.sodiumamount > %s and m.proteinamount < %s and m.proteinamount > %s;'
+  #q = "select rm.namemenu, rt.name,m.caloryamount, m.proteinamount, m.sodiumamount, rm.price from restaurants rt, restaurantsmenu rm, menunutrients m where rm.rid = rt.rid and rm.mid = m.mid and m.rid = rm.rid; "
+  print q  
+  cursor = g.conn.execute(q, (restaurant, keyword, category, calorie_upper, calorie_lower,sodium_upper, sodium_lower, protein_upper, protein_lower,))
+  #cursor = g.conn.execute(q)
+  #cursor = g.conn.execute("select rm.namemenu, rt.name,m.caloryamount, m.proteinamount, m.sodiumamount, rm.price from restaurants rt, restaurantsmenu rm, menunutrients m where rm.rid = rt.rid and rm.mid = m.mid and m.rid = rm.rid; ")
+
+  foodname = []
+  restaurantname = []
+  sodium = []
+  calorie = []
+  protein = []
+  price = []
+  #
+  # example of a database query
+  #
+  
+  for result in cursor:
+    print result['namemenu']
+    foodname.append(result['namemenu'])# can also be accessed using result[0]
+    print result['name']
+    restaurantname.append(result['name'])
+    print result['sodiumamount']
+    sodium.append(result['sodiumamount'])
+    print result['caloryamount']
+    calorie.append(result['caloryamount'])
+    print result['proteinamount']
+    protein.append(result['proteinamount'])
+    print result['price']
+    price.append(result['price'])
+  cursor.close()
+
+  #context = dict(foodname = foodname, restautrant = restaurantname, sodium = sodium, calorie = calorie, protein = protein, price = price )
+    #g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
+  return render_template("index.html", foodname = foodname, restautrant = restaurantname, sodium = sodium, calorie = calorie, protein = protein, price = price)
+
+
+
+#@app.route('/order', methods=['POST'])
+#def order():
+#    restaurant = request.form['restaurant']
+#    foodname = request.form['foodname']
+#    quantity = request.form['quantity']
+#    name = request.form['name']
+#    deliverytime = request.form['delivery time']
+#    address = request.form['address']
+#    mid = []
+#    rid = []
+#    amount = []
+#    price = 0
+#    calorie = 0
+#    protein = 0
+#    amount.append(int(quantity))
+#    q = 'select rm.mid, rt.rid, rm.price, m.caloryamount, m.sodiumamount, m.proteinamount from restaurants rt, restaurantsmenu rm, menunutrients, m where rt.rid = rm.rid and m.mid = rm.mid and rm.namemenu = %s and rt.name = %s;' 
+#   cursor1 = g.conn.execute(q, (foodname, restaurant, ) )
+#   for  result in cursor1:
+#        mid.append(result['mid'])
+#        rid.append(result['rid'])
+#        price = price + int(result['price'])
+#        calorie = calorie + int(result['caloryamount'])
+#        sodium = sodium + int(result['sodiumamount'])
+#        protein = protein + int(result['proteinamount'])
+#    cursor1.close()
+#    q2 = 'select uid from usersearch;'
+#    cursor2 = g.conn.execute(q2)
+#    length_uid = len(cursor2);
+#    uid_new = length_uid + 1
+#    q3 = 'select oid from userorder;'
+#    cursor3 = g.conn.execute(q3)
+#    length_oid = len(cursor3);
+#    oid_new = length_oid + 1
+    
+#    return redictrict('another')
+
 
 
 @app.route('/login', methods=['GET','POST'])
@@ -209,6 +348,7 @@ def login():
 
 
 if __name__ == "__main__":
+
   import click
 
   @click.command()
