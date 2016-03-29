@@ -1,0 +1,47 @@
+
+<html>
+<head>
+<link rel = "stylesheet" type="text/css" href= "{{ url_for('static',filename='styles/mystyle.css') }}">
+</head>
+
+<body> 
+	<img src = "../static/images/bg.jpg" width=100% height="200" alt="klematis"/>
+	<h1>Here is your order</h1>
+	<div class="blocktext">
+    	<H2> Restaurant Name: 
+      {% for n in restaurant %}
+      <div>{{n}}</div>
+      {% endfor %}
+
+  		<H2> Food Name: 
+      {% for n in foodname %}
+      <div>{{n}}</div>
+      {% endfor %}
+
+  		<H2> Quantity: 
+      {% for n in quantity %}
+      <div>{{n}}</div>
+      {% endfor %}
+
+  		<H2> Name: 
+      {% for n in name %}
+      <div>{{n}}</div>
+      {% endfor %}
+
+  		<H2> Address: 
+      {% for n in deliveraddress %}
+      <div>{{n}}</div>
+      {% endfor %}
+
+  		Total Price: 
+      {% for n in totalprice %}
+      <div>{{n}}</div>
+      {% endfor %}
+
+  	</div>
+  	<form method="POST" action="/back">
+	<p><H2> <input type="submit" value="back to main page"></H2></p>
+	</form>
+
+</body>
+</html>

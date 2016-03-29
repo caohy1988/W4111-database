@@ -242,13 +242,9 @@ def approot():
 def order_page():
   return render_template("order.html")
 
-@app.route('/back')
+@app.route('/back', methods=['POST','GET'])
 def back():
   return render_template("index.html")
-
-@app.route('/order')
-def order():
-  return render_template("final.html")
 
 @app.route('/search', methods=['POST','GET'])
 def search():
@@ -268,76 +264,136 @@ def search():
   q = 'select rm.namemenu, rt.name,m.caloryamount, m.proteinamount, m.sodiumamount, rm.price from restaurants rt, restaurantsmenu rm, menunutrients m where rm.rid = rt.rid and rm.mid = m.mid and m.rid = rm.rid and rt.name = %s and rm.namemenu = %s and rm.category = %s and  m.caloryamount < %s and m.caloryamount > %s and m.sodiumamount < %s and m.sodiumamount > %s and m.proteinamount < %s and m.proteinamount > %s;'
   #q = "select rm.namemenu, rt.name,m.caloryamount, m.proteinamount, m.sodiumamount, rm.price from restaurants rt, restaurantsmenu rm, menunutrients m where rm.rid = rt.rid and rm.mid = m.mid and m.rid = rm.rid; "
   print q  
-  cursor = g.conn.execute(q, (restaurant, keyword, category, calorie_upper, calorie_lower,sodium_upper, sodium_lower, protein_upper, protein_lower,))
+  try:
+    cursor = g.conn.execute(q, (restaurant, keyword, category, calorie_upper, calorie_lower,sodium_upper, sodium_lower, protein_upper, protein_lower,))
   #cursor = g.conn.execute(q)
   #cursor = g.conn.execute("select rm.namemenu, rt.name,m.caloryamount, m.proteinamount, m.sodiumamount, rm.price from restaurants rt, restaurantsmenu rm, menunutrients m where rm.rid = rt.rid and rm.mid = m.mid and m.rid = rm.rid; ")
 
-  foodname = []
-  restaurantname = []
-  sodium = []
-  calorie = []
-  protein = []
-  price = []
+    foodname = []
+    restaurantname = []
+    sodium = []
+    calorie = []
+    protein = []
+    price = []
+    error = []
   #
   # example of a database query
   #
   
-  for result in cursor:
-    print result['namemenu']
-    foodname.append(result['namemenu'])# can also be accessed using result[0]
-    print result['name']
-    restaurantname.append(result['name'])
-    print result['sodiumamount']
-    sodium.append(result['sodiumamount'])
-    print result['caloryamount']
-    calorie.append(result['caloryamount'])
-    print result['proteinamount']
-    protein.append(result['proteinamount'])
-    print result['price']
-    price.append(result['price'])
-  cursor.close()
+    for result in cursor:
+      print result['namemenu']
+      foodname.append(result['namemenu'])# can also be accessed using result[0]
+      print result['name']
+      restaurantname.append(result['name'])
+      print result['sodiumamount']
+      sodium.append(result['sodiumamount'])
+      print result['caloryamount']
+      calorie.append(result['caloryamount'])
+      print result['proteinamount']
+      protein.append(result['proteinamount'])
+      print result['price']
+      price.append(result['price'])
+    cursor.close()
 
   #context = dict(foodname = foodname, restautrant = restaurantname, sodium = sodium, calorie = calorie, protein = protein, price = price )
     #g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
-  return render_template("index.html", foodname = foodname, restautrant = restaurantname, sodium = sodium, calorie = calorie, protein = protein, price = price)
+    return render_template("index.html", foodname = foodname, restautrant = restaurantname, sodium = sodium, calorie = calorie, protein = protein, price = price)
+  except Exception as e:
+    q = "Not found"
+    print q
+    error.append(q)
+    return render_template("index.html", error = error)
 
 
+@app.route('/order', methods=['POST','GET'])
+def order():
+  restaurant = request.form['restaurant']
+  print restaurant
+  foodname = request.form['foodname']
+  print foodname
+  quantity = request.form['quantity']
+  print quantity
+  name = request.form['name']
+  print name
+  deliverytime = request.form['deliverytime']
+  print deliverytime
+  address = request.form['address']
+  print address
+  mid = []
+  rid = []
+  amount = []
+  uid = []
+  oid = []
+  price = 0
+  calorie = 0
+  sodium = 0
+  protein = 0
+  foodname_list = []
+  restaurant_list = []
+  name_list = []
+  address_list = []
+  totalprice_list = []
+  foodname_list.append(foodname)
+  restaurant_list.append(restaurant)
+  name_list.append(name)
+  address_list.append(address) 
+  amount.append(quantity)
+  q = 'select rm.mid, rt.rid, rm.price, m.caloryamount, m.sodiumamount, m.proteinamount from restaurants rt, restaurantsmenu rm, menunutrients m where rt.rid = rm.rid and m.mid = rm.mid and rm.namemenu = %s and rt.name = %s;' 
+  cursor1 = g.conn.execute(q, (foodname, restaurant, ) )
+  print q
+  for  result in cursor1:
+    mid.append(result['mid'])
+    print result['mid']
+    rid.append(result['rid'])
+    print result['rid']
+    price = price + int(result['price'])
+    print result['price']
+    calorie = calorie + int(result['caloryamount'])
+    print result['caloryamount']
+    sodium = sodium + int(result['sodiumamount'])   
+    print result['sodiumamount']
+    protein = protein + int(result['proteinamount'])
+    print result['proteinamount']
+  cursor1.close()
+  q2 = 'select uid from usersearch;'
+  print q2
+  cursor2 = g.conn.execute(q2)
+  for result in cursor2:
+    uid.append(result['uid'])
+    print result['uid']
+  length_uid = len(uid) 
+  cursor2.close()
+  uid_new = length_uid + 21
+  q3 = 'select oid from userorder;'
+  cursor3 = g.conn.execute(q3)
+  for result in cursor3:
+    oid.append(result['oid'])  
+    print result['oid']
+  cursor3.close()
+  length_oid = len(oid)   
+  oid_new = length_oid + 100
 
-#@app.route('/order', methods=['POST'])
-#def order():
-#    restaurant = request.form['restaurant']
-#    foodname = request.form['foodname']
-#    quantity = request.form['quantity']
-#    name = request.form['name']
-#    deliverytime = request.form['delivery time']
-#    address = request.form['address']
-#    mid = []
-#    rid = []
-#    amount = []
-#    price = 0
-#    calorie = 0
-#    protein = 0
-#    amount.append(int(quantity))
-#    q = 'select rm.mid, rt.rid, rm.price, m.caloryamount, m.sodiumamount, m.proteinamount from restaurants rt, restaurantsmenu rm, menunutrients, m where rt.rid = rm.rid and m.mid = rm.mid and rm.namemenu = %s and rt.name = %s;' 
-#   cursor1 = g.conn.execute(q, (foodname, restaurant, ) )
-#   for  result in cursor1:
-#        mid.append(result['mid'])
-#        rid.append(result['rid'])
-#        price = price + int(result['price'])
-#        calorie = calorie + int(result['caloryamount'])
-#        sodium = sodium + int(result['sodiumamount'])
-#        protein = protein + int(result['proteinamount'])
-#    cursor1.close()
-#    q2 = 'select uid from usersearch;'
-#    cursor2 = g.conn.execute(q2)
-#    length_uid = len(cursor2);
-#    uid_new = length_uid + 1
-#    q3 = 'select oid from userorder;'
-#    cursor3 = g.conn.execute(q3)
-#    length_oid = len(cursor3);
-#    oid_new = length_oid + 1
-    
-#    return redictrict('another')
+  q4 = 'insert into usersearch (uid, name) Values(%s, %s)'
+  print q4
+  g.conn.execute(q4, (uid_new, name,))
+  totalprice = price * int(amount[0])
+  print totalprice
+  totalprice_list.append(totalprice)
+  q5 = 'insert into userorder (uid, oid, deliveraddress, totalprice) Values(%s, %s, %s, %s)'
+  print q5
+  print address
+  print totalprice
+  g.conn.execute(q5, (uid_new, oid_new, address, totalprice,))
+  print "success"
+  print foodname_list
+  print name_list
+  print address_list
+  print amount
+  print restaurant_list
+  print totalprice_list
+
+  return render_template("final.html", foodname = foodname_list, name = name_list, deliveraddress = address_list, quantity = amount, restaurant = restaurant_list, totalprice = totalprice_list)
+#     return redictrict('another')
 
 
 
