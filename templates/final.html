@@ -8,34 +8,34 @@
 	<img src = "../static/images/bg.jpg" width=100% height="200" alt="klematis"/>
 	<h1>Here is your order</h1>
 	<div class="blocktext">
-    	<H2> Restaurant Name: 
-      {% for n in restaurant %}
-      <div>{{n}}</div>
+    	<H2> Restaurant Name: </H2>
+      <p> {% for n in restaurant %}</p>
+      <div><p>{{n}}</p></div>
       {% endfor %}
 
-  		<H2> Food Name: 
-      {% for n in foodname %}
-      <div>{{n}}</div>
+  		<H2> Food Name: </H2>
+      <p>{% for n in foodname %}</p>
+      <div><p>{{n}}</p></div>
       {% endfor %}
 
-  		<H2> Quantity: 
+  		<H2> Quantity: </H2>
       {% for n in quantity %}
-      <div>{{n}}</div>
+      <div><p>{{n}}</p></div>
       {% endfor %}
 
-  		<H2> Name: 
+  		<H2> Name: </H2>
       {% for n in name %}
-      <div>{{n}}</div>
+      <div><p>{{n}}</p></div>
       {% endfor %}
 
-  		<H2> Address: 
+  		<H2> Address: </H2>
       {% for n in deliveraddress %}
-      <div>{{n}}</div>
+      <div><p>{{n}}</p></div>
       {% endfor %}
 
-  		Total Price: 
+  		<H2> Total Price: </H2>
       {% for n in totalprice %}
-      <div>{{n}}</div>
+      <div><p>{{n}}</p></div>
       {% endfor %}
 
   	</div>

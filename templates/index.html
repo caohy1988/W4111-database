@@ -10,6 +10,7 @@
   <H2> Restaurant </H2>
   <form method="POST" action="/search">
   <H2><select name = "restaurant", style="width: 300px;">
+      <option value = ""> Not Specified </option>
       <option value = "7 Eleven"> 7 Eleven </option>
       <option value = "A&W"> A&W </option>
       <option value = "Burger King"> Burger King </option>
@@ -20,6 +21,7 @@
 
   <H2> Food Categories </H2>
   <H2><select name = "category", style="width: 300px;">
+      <option value = ""> Not Specified </option>
       <option value = "Pizza"> Pizza </option>
       <option value = "Salads"> Salads </option>
       <option value = "Sandwitches"> Sandwitches </option>
@@ -53,33 +55,41 @@
   </form>
 
   <H2>
+    <div class="floating-box">
     {% for n in foodname %}
-    <div>Foodname: {{n}}</div>
+    Foodname: {{n}}
     {% endfor %}
+    </div>
 
+    <div class="floating-box">
     {% for n in restaurant %}
-    <div>Restaurant: {{n}}</div>
+    Restaurant: {{n}}
     {% endfor %}
+    </div>
 
+    <div class="floating-box">
     {% for n in calorie %}
-    <div>Calorie: {{n}}</div>
+    Calorie: {{n}}
     {% endfor %}
+    </div>
 
+    <div class="floating-box">
     {% for n in protein %}
-    <div>Protein: {{n}}</div>
+    Protein: {{n}}
     {% endfor %}
+    </div>
 
+    <div class="floating-box">
     {% for n in sodium %}
-    <div>Sodium: {{n}}</div>
+    Sodium: {{n}}
     {% endfor %}
+    </div>
 
+    <div class="floating-box">
     {% for n in price %}
-    <div>Price: {{n}}</div>
-    {% endfor %}   
-
-    {% for n in error %}
-    <div>Error: {{n}}</div>
-    {% endfor %} 
+    Price: {{n}}
+    {% endfor %}
+    </div>   
 
   </H2>
 
